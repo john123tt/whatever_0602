@@ -1,0 +1,766 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>FileReplayView</class>
+ <widget class="QWidget" name="FileReplayView">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>321</width>
+    <height>979</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>10</number>
+   </property>
+   <property name="leftMargin">
+    <number>2</number>
+   </property>
+   <property name="topMargin">
+    <number>10</number>
+   </property>
+   <property name="rightMargin">
+    <number>2</number>
+   </property>
+   <property name="bottomMargin">
+    <number>2</number>
+   </property>
+   <item>
+    <widget class="QGroupBox" name="data_replay_group_box">
+     <property name="title">
+      <string>回放</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QLineEdit" name="replay_file_path"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="replay_file_browse">
+          <property name="maximumSize">
+           <size>
+            <width>30</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>...</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLabel" name="channel_number_label">
+          <property name="text">
+           <string>通道数</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="channel_number_spinBox"/>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QPushButton" name="replay_button">
+        <property name="text">
+         <string>开始回放</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QScrollArea" name="file_header_scroll_area">
+        <property name="verticalScrollBarPolicy">
+         <enum>Qt::ScrollBarAsNeeded</enum>
+        </property>
+        <property name="horizontalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOff</enum>
+        </property>
+        <property name="widgetResizable">
+         <bool>true</bool>
+        </property>
+        <widget class="QWidget" name="file_header_scroll_area_widget">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>291</width>
+           <height>822</height>
+          </rect>
+         </property>
+         <layout class="QVBoxLayout" name="file_header_scroll_layout">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QGroupBox" name="file_header_group_box">
+            <property name="title">
+             <string>文件头</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout">
+             <property name="topMargin">
+              <number>30</number>
+             </property>
+             <item row="21" column="2">
+              <widget class="QDoubleSpinBox" name="gain_parameter2_spin_box">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="decimals">
+                <number>4</number>
+               </property>
+               <property name="minimum">
+                <double>0.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>100000000000.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="25" column="2">
+              <widget class="QLineEdit" name="modify_time_line_edit">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="scan_points_label">
+               <property name="text">
+                <string>扫描点数:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="25" column="0">
+              <widget class="QLabel" name="modify_time_label">
+               <property name="text">
+                <string>修改时间：</string>
+               </property>
+              </widget>
+             </item>
+             <item row="14" column="0">
+              <widget class="QLabel" name="trigger_frames_label">
+               <property name="text">
+                <string>单次触发帧数：</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="frame_number_label">
+               <property name="text">
+                <string>道数：</string>
+               </property>
+              </widget>
+             </item>
+             <item row="19" column="2">
+              <widget class="QDoubleSpinBox" name="max_modulus_value_spin_box">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="decimals">
+                <number>4</number>
+               </property>
+               <property name="minimum">
+                <double>0.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>10000000000.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="12" column="0">
+              <widget class="QLabel" name="trigger_mode_label">
+               <property name="text">
+                <string>触发模式：</string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="0">
+              <widget class="QLabel" name="IFBW_label">
+               <property name="text">
+                <string>中频带宽</string>
+               </property>
+              </widget>
+             </item>
+             <item row="8" column="2">
+              <widget class="QSpinBox" name="antenna_stop_frequency_spin_box">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="suffix">
+                <string>MHz</string>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
+               <property name="maximum">
+                <number>100000000</number>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="2">
+              <widget class="QSpinBox" name="start_frequencty_spin_box">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="suffix">
+                <string>MHz</string>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
+               <property name="maximum">
+                <number>100000000</number>
+               </property>
+              </widget>
+             </item>
+             <item row="13" column="0">
+              <widget class="QLabel" name="trigger_interval_label">
+               <property name="text">
+                <string>触发间隔：</string>
+               </property>
+              </widget>
+             </item>
+             <item row="16" column="2">
+              <widget class="QLineEdit" name="stop_length">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="22" column="0">
+              <widget class="QLabel" name="company_name_label">
+               <property name="text">
+                <string>公司名称：</string>
+               </property>
+              </widget>
+             </item>
+             <item row="23" column="2">
+              <widget class="QLineEdit" name="testing_location_line_edit">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="19" column="0">
+              <widget class="QLabel" name="max_modulus_value_label">
+               <property name="text">
+                <string>最大值：</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QLineEdit" name="frame_number_line_edit">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="0" rowspan="2" colspan="2">
+              <widget class="QLabel" name="antenna_start_frequency_label">
+               <property name="text">
+                <string>天线起始频率：</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="stop_frequency_label">
+               <property name="text">
+                <string>终止频率：</string>
+               </property>
+              </widget>
+             </item>
+             <item row="11" column="2">
+              <widget class="QComboBox" name="trigger_source_combo_box">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <item>
+                <property name="text">
+                 <string>内部触发</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>外部触发</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="18" column="0">
+              <widget class="QLabel" name="window_parameter_label">
+               <property name="text">
+                <string>窗口参数：</string>
+               </property>
+              </widget>
+             </item>
+             <item row="16" column="0">
+              <widget class="QLabel" name="stop_length_label">
+               <property name="text">
+                <string>终止里程点：</string>
+               </property>
+              </widget>
+             </item>
+             <item row="11" column="0">
+              <widget class="QLabel" name="trigger_source_label">
+               <property name="text">
+                <string>触发源：</string>
+               </property>
+              </widget>
+             </item>
+             <item row="15" column="0">
+              <widget class="QLabel" name="start_length_label">
+               <property name="text">
+                <string>起始里程点：</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="2">
+              <widget class="QComboBox" name="scan_points_combo_box">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="editable">
+                <bool>true</bool>
+               </property>
+               <item>
+                <property name="text">
+                 <string>128</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>256</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>512</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>1024</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="10" column="2">
+              <widget class="QSpinBox" name="end_time_spin_box">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="suffix">
+                <string>ns</string>
+               </property>
+               <property name="minimum">
+                <number>-1000000000</number>
+               </property>
+               <property name="maximum">
+                <number>1000000000</number>
+               </property>
+              </widget>
+             </item>
+             <item row="9" column="0">
+              <widget class="QLabel" name="start_time_label">
+               <property name="text">
+                <string>起始时间：</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="2">
+              <widget class="QSpinBox" name="stop_frequencty_spin_box">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="suffix">
+                <string>MHz</string>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
+               <property name="maximum">
+                <number>100000000</number>
+               </property>
+              </widget>
+             </item>
+             <item row="24" column="0">
+              <widget class="QLabel" name="create_time_label">
+               <property name="text">
+                <string>创建时间：</string>
+               </property>
+              </widget>
+             </item>
+             <item row="18" column="2">
+              <widget class="QDoubleSpinBox" name="window_parameter">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="maximum">
+                <double>1000000.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="22" column="2">
+              <widget class="QLineEdit" name="company_name_line_edit">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="13" column="2">
+              <widget class="QLineEdit" name="trigger_interval">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="17" column="0">
+              <widget class="QLabel" name="dielectric_label">
+               <property name="text">
+                <string>介电常数：</string>
+               </property>
+              </widget>
+             </item>
+             <item row="14" column="2">
+              <widget class="QLineEdit" name="trigger_frames">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="start_frequencty_label">
+               <property name="text">
+                <string>起始频率：</string>
+               </property>
+              </widget>
+             </item>
+             <item row="24" column="2">
+              <widget class="QLineEdit" name="create_time_line_edit">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="17" column="2">
+              <widget class="QLineEdit" name="dielectric">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="8" column="0">
+              <widget class="QLabel" name="antenna_stop_frequency_label">
+               <property name="text">
+                <string>天线终止频率：</string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="2">
+              <widget class="QComboBox" name="IFBW_combo_box">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="editable">
+                <bool>true</bool>
+               </property>
+               <item>
+                <property name="text">
+                 <string>1Hz</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>2Hz</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>5Hz</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>10Hz</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>20Hz</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>50Hz</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>100Hz</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>200Hz</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>500Hz</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>1KHz</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>2KHz</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>5KHz</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>10KHz</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>15KHz</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>20KHz</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>30KHz</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>50KHz</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>100KHz</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>200KHz</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>600KHz</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>1MHz</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>2MHz</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="9" column="2">
+              <widget class="QSpinBox" name="start_time_spin_box">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="suffix">
+                <string>ns</string>
+               </property>
+               <property name="minimum">
+                <number>-1000000000</number>
+               </property>
+               <property name="maximum">
+                <number>1000000000</number>
+               </property>
+              </widget>
+             </item>
+             <item row="15" column="2">
+              <widget class="QLineEdit" name="start_length">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="20" column="2">
+              <widget class="QDoubleSpinBox" name="gain_parameter1_spin_box">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="decimals">
+                <number>4</number>
+               </property>
+               <property name="minimum">
+                <double>0.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>100000000000.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="10" column="0">
+              <widget class="QLabel" name="end_time_label">
+               <property name="text">
+                <string>终止时间：</string>
+               </property>
+              </widget>
+             </item>
+             <item row="23" column="0">
+              <widget class="QLabel" name="testing_location_label">
+               <property name="text">
+                <string>测试地点：</string>
+               </property>
+              </widget>
+             </item>
+             <item row="21" column="0">
+              <widget class="QLabel" name="gain_parameter2_label">
+               <property name="text">
+                <string>增益参数2：</string>
+               </property>
+              </widget>
+             </item>
+             <item row="12" column="2">
+              <widget class="QComboBox" name="trigger_mode_combo_box">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <item>
+                <property name="text">
+                 <string>单次触发</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>连续触发</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="20" column="0">
+              <widget class="QLabel" name="gain_parameter1_label">
+               <property name="text">
+                <string>增益参数1：</string>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="2">
+              <widget class="QSpinBox" name="antenna_start_frequency_spin_box">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="suffix">
+                <string>MHz</string>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
+               <property name="maximum">
+                <number>100000000</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

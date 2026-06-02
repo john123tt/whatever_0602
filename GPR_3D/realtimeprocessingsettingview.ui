@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>RealTimeProcessingSettingView</class>
+ <widget class="QWidget" name="RealTimeProcessingSettingView">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>279</width>
+    <height>521</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QLabel" name="label_trigger_source_4">
+     <property name="text">
+      <string>背景消除：</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1" colspan="2">
+    <widget class="QComboBox" name="eliminate_background">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>1</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="currentIndex">
+      <number>1</number>
+     </property>
+     <item>
+      <property name="text">
+       <string>开启</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>关闭</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>伪彩色图</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1" colspan="2">
+    <widget class="QComboBox" name="comboBox">
+     <property name="styleSheet">
+      <string notr="true">QComboBox {
+    background-color: white;
+    color: black;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    padding: 3px 10px 3px 5px;
+}
+QComboBox QAbstractItemView {
+    background-color: white;
+    color: black;
+    border: 1px solid #cccccc;
+    selection-background-color: #e0e0e0;
+    selection-color: black;
+}
+</string>
+     </property>
+     <item>
+      <property name="text">
+       <string>灰度图</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>黑绿红</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>蓝白红</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>黑蓝红</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QPushButton" name="adjust_gain_button">
+     <property name="text">
+      <string>调节增益</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
