@@ -5,14 +5,14 @@
 
 struct V2HyperbolaParams {
     double t_min_ns = 0.0;
-    double t_main_ns = 2.0;
+    double t_main_ns = 1.5;
     double t_max_ns = 6.0;
     int rmax_tr = 0;
     QVector<int> radii_tr;
     int stride_tr = 10;
-    double seed_threshold = 2;
-    double confirm_threshold = 1;
-    double continuity_threshold = 1;
+    double seed_threshold = 2.6;
+    double confirm_threshold = 0.2;
+    double continuity_threshold = 0.2;
 };
 
 struct V2HyperbolaBox {

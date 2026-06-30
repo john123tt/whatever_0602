@@ -1,6 +1,6 @@
 #include <windows.h>
 
-IDI_ICON1	ICON	"D:\\GPR_0601\\GPR_3D\\logo.ico"
+IDI_ICON1	ICON	"D:\\GPR_0602\\GPR_3D\\logo.ico"
 
 VS_VERSION_INFO VERSIONINFO
 	FILEVERSION 0,0,0,0

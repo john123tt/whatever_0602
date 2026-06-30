@@ -1,6 +1,8 @@
 #include "utility.h"
 #include <cmath>
 #include <complex>
+#include <memory>
+#include <mutex>
 #include <vector>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -112,6 +114,82 @@ std::vector<std::complex<double>> convolve_fft(
   fft_inplace(fa, true);
   fa.resize(needed);
   return fa;
+}
+
+struct CztPlan {
+  int count = 0;
+  double bandwidth_hz = 0.0;
+  int start_time_ns = 0;
+  int end_time_ns = 0;
+  int fft_size = 0;
+  QVector<double> window;
+  std::vector<std::complex<double>> chirp;
+  std::vector<std::complex<double>> a_factor;
+  std::vector<std::complex<double>> b_fft;
+};
+
+bool matches_czt_plan(
+    const CztPlan& plan,
+    int count,
+    double bandwidth_hz,
+    int start_time_ns,
+    int end_time_ns)
+{
+  return plan.count == count &&
+      plan.bandwidth_hz == bandwidth_hz &&
+      plan.start_time_ns == start_time_ns &&
+      plan.end_time_ns == end_time_ns;
+}
+
+std::shared_ptr<const CztPlan> get_czt_plan(
+    int count,
+    double bandwidth_hz,
+    int start_time_ns,
+    int end_time_ns)
+{
+  static std::mutex mutex;
+  static std::shared_ptr<CztPlan> cached_plan;
+
+  std::lock_guard<std::mutex> lock(mutex);
+  if(cached_plan &&
+      matches_czt_plan(*cached_plan, count, bandwidth_hz, start_time_ns, end_time_ns)) {
+    return cached_plan;
+  }
+
+  auto plan = std::make_shared<CztPlan>();
+  plan->count = count;
+  plan->bandwidth_hz = bandwidth_hz;
+  plan->start_time_ns = start_time_ns;
+  plan->end_time_ns = end_time_ns;
+
+  const double t0 = start_time_ns * 1e-9;
+  const double t1 = end_time_ns * 1e-9;
+  const double ts_val = 1.0 / (bandwidth_hz / count);
+  const auto W = std::exp(std::complex<double>(0.0, 2.0 * kPi * (t1 - t0) / count / ts_val));
+  const auto A = std::exp(std::complex<double>(0.0, 2.0 * kPi * (-t0) / ts_val));
+  const auto A_inverse = 1.0 / A;
+  const std::complex<double> log_w = std::log(W);
+
+  plan->window = kaiser_window(count, kMatlabDefaultKaiserBeta);
+  plan->chirp.resize(count);
+  plan->a_factor.resize(count);
+  std::complex<double> a_factor_value(1.0, 0.0);
+  for(int n = 0; n < count; ++n) {
+    plan->chirp[n] = std::exp(log_w * (0.5 * n * n));
+    plan->a_factor[n] = a_factor_value;
+    a_factor_value *= A_inverse;
+  }
+
+  const int needed = 3 * count - 2;
+  plan->fft_size = next_power_of_two(needed);
+  plan->b_fft.assign(plan->fft_size, {0.0, 0.0});
+  for(int m = -(count - 1); m <= count - 1; ++m) {
+    plan->b_fft[m + count - 1] = std::exp(log_w * (-0.5 * m * m));
+  }
+  fft_inplace(plan->b_fft, false);
+
+  cached_plan = plan;
+  return cached_plan;
 }
 }
 
@@ -241,33 +319,23 @@ QVector<QVector<GPR_Complex>> GPR::matlab_default_czt_transform(
       continue;
     }
 
-    const double t0 = start_time_ns * 1e-9;
-    const double t1 = end_time_ns * 1e-9;
-    const double ts_val = 1.0 / (bandwidth_hz / count);
-    const auto W = std::exp(std::complex<double>(0.0, 2.0 * kPi * (t1 - t0) / count / ts_val));
-    const auto A = std::exp(std::complex<double>(0.0, 2.0 * kPi * (-t0) / ts_val));
-    const auto A_inverse = 1.0 / A;
-    const auto window = kaiser_window(count, kMatlabDefaultKaiserBeta);
-
-    const std::complex<double> log_w = std::log(W);
-    std::vector<std::complex<double>> a(count);
-    std::vector<std::complex<double>> b(2 * count - 1);
-    std::complex<double> a_factor(1.0, 0.0);
+    const auto plan = get_czt_plan(count, bandwidth_hz, start_time_ns, end_time_ns);
+    std::vector<std::complex<double>> fa(plan->fft_size, {0.0, 0.0});
     for(int n = 0; n < count; ++n) {
-      const auto chirp = std::exp(log_w * (0.5 * n * n));
-      const auto sample = std::complex<double>(input.data[n].real, input.data[n].imag) * window[n];
-      a[n] = sample * a_factor * chirp;
-      a_factor *= A_inverse;
-    }
-    for(int m = -(count - 1); m <= count - 1; ++m) {
-      b[m + count - 1] = std::exp(log_w * (-0.5 * m * m));
+      const auto sample =
+          std::complex<double>(input.data[n].real, input.data[n].imag) * plan->window[n];
+      fa[n] = sample * plan->a_factor[n] * plan->chirp[n];
     }
 
-    const auto conv = convolve_fft(a, b);
+    fft_inplace(fa, false);
+    for(int i = 0; i < plan->fft_size; ++i) {
+      fa[i] *= plan->b_fft[i];
+    }
+    fft_inplace(fa, true);
+
     QVector<GPR_Complex> output(count);
     for(int k = 0; k < count; ++k) {
-      const auto chirp = std::exp(log_w * (0.5 * k * k));
-      const auto value = chirp * conv[k + count - 1];
+      const auto value = plan->chirp[k] * fa[k + count - 1];
       output[k] = GPR_Complex{value.real(), value.imag()};
     }
 

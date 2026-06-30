@@ -546,9 +546,21 @@ void realtimeacquisition::on_raw_frame_arrived(
         return;
 
     // 5. ?????? m_tx_rx_channels ??
-    QVector<QVector<GPR_Complex>> merged;
+    int merged_size = 0;
     for (const auto& ch : m_tx_rx_channels) {
-        merged += m_curr_frame[ch.tx_channel];
+        auto it = m_curr_frame.find(ch.tx_channel);
+        if (it != m_curr_frame.end()) {
+            merged_size += it.value().size();
+        }
+    }
+
+    QVector<QVector<GPR_Complex>> merged;
+    merged.reserve(merged_size);
+    for (const auto& ch : m_tx_rx_channels) {
+        auto frame = m_curr_frame.take(ch.tx_channel);
+        for (auto& trace : frame) {
+            merged.push_back(std::move(trace));
+        }
     }
 
     emit data_ready(merged, false);

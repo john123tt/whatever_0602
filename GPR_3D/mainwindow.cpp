@@ -404,7 +404,6 @@ void cache(const QVector<QVector<QVector<double>>>& data, int index,const QStrin
         auto out = QDataStream(&file);
         out.setByteOrder(QDataStream::LittleEndian);
         out << static_cast<int>(data.size()) << static_cast<int>(data[data.size()-1].size())<<static_cast<int>(data[0][0].size());
-        qDebug()<<static_cast<int>(data[data.size()-1].size());
         auto block_size = data[0][0].size()* sizeof(double);
         for(auto y = 0; y < data[data.size()-1].size(); ++y) {
             for(auto x = 0; x < data.size(); ++x) {
@@ -1282,6 +1281,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    m_algorithm_timing_profiler.exportCsv(QStringLiteral(PROJECT_ROOT) + "/timing_logs");
     clear_cache();
     GPR_Cleanup();
     delete ui;
@@ -1492,11 +1492,7 @@ void MainWindow::init_plots() {
 
     m_topview_range_slider = new RangeSlider();
     m_topview_range_slider->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
-    m_topview_range_slider = new RangeSlider();
-    m_topview_range_slider->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
     m_topview_range_slider->setFixedWidth(18);
-    range_layout->addWidget(m_topview_range_slider, 1);
-
     range_layout->addWidget(m_topview_range_slider, 1);
 
     range_layout->addItem(m_topview_range_bottom_spacer);
@@ -1581,6 +1577,7 @@ void MainWindow::on_display_data(const QVector<QVector<GPR_Complex>>& multichann
         if (m_is_v2_hyperbola_detector_enabled && !m_is_replay_loading) {
             apply_realtime_v2_hyperbola_backfill(true);
         }
+        m_algorithm_timing_profiler.exportCsv(QStringLiteral(PROJECT_ROOT) + "/timing_logs");
         if (m_is_replay_loading) {
             cache(m_raw_data, m_cache_block_index, "1");
         } else {
@@ -1654,23 +1651,25 @@ void MainWindow::on_display_data(const QVector<QVector<GPR_Complex>>& multichann
     }
     // m_background.clear();
 
+        const bool was_eliminate_background = m_is_eliminate_background;
+        bool base_background_changed = false;
         if(m_track_number < CALCULATE_BACKGROUND_FRAMES) {
             // m_real_time_processing_setting_view->set_eliminate_background(false);
             // QMessageBox::warning(this, tr("GPR"), tr("???50?????"), QMessageBox::Ok);
             // return;
 
             for(auto i=0;i<multichannel_data.size();++i){
-                for(auto j=0;j<multichannel_data[0].size();++j){
-                    m_base_data[i][j] += multichannel_data[i][j].real/**5/511.4*/ / CALCULATE_BACKGROUND_FRAMES;
+                const auto& channel_data = multichannel_data[i];
+                for(auto j=0;j<channel_data.size() && j < m_base_data[i].size();++j){
+                    m_base_data[i][j] += channel_data[j].real/**5/511.4*/ / CALCULATE_BACKGROUND_FRAMES;
                 }
             }
+            base_background_changed = true;
         }
         activate_delayed_realtime_processing_if_ready();
         // QVector<QVector<double>> background;
-        if(m_is_eliminate_background){
+        if(m_is_eliminate_background && (base_background_changed || !was_eliminate_background)){
             m_background= m_base_data;
-        }else{
-            m_background= QVector<QVector<double>>(m_channel_number, QVector<double>(m_points, 0.0));
         }
     auto strength_data = QVector<double>(m_points);
     auto strength_data_topview=QVector<double>(multichannel_data.size());
@@ -1680,9 +1679,7 @@ void MainWindow::on_display_data(const QVector<QVector<GPR_Complex>>& multichann
     QVector<double> unit_gains(m_points, 1.0);
     const QVector<double>& gains_use = m_gains.isEmpty() ? unit_gains : m_gains;
     QVector<double> zero_background(m_points, 0.0);
-    QVector<QVector<double>> strength_data_sideview(multichannel_data.size());
     auto real_data = QVector<double>(m_points);
-    auto real_data_multi = QVector<double>(m_points);
     m_raw_data.resize(multichannel_data.size());
     const bool replay_deferred_processing =
         m_is_replay_loading &&
@@ -1731,7 +1728,7 @@ void MainWindow::on_display_data(const QVector<QVector<GPR_Complex>>& multichann
     //     }, CALCULATE_BACKGROUND_FRAMES);
     // }
     for(auto i=0;i<multichannel_data.size();++i){
-        auto data=multichannel_data[i];
+        const auto& data=multichannel_data[i];
         if(data.empty()/* || m_gains.size() != data.size()*/) {
             return;
         }
@@ -1742,11 +1739,9 @@ void MainWindow::on_display_data(const QVector<QVector<GPR_Complex>>& multichann
             update_display_scale_reference(real_data);
         }
         m_raw_data[i].append(real_data);
-        if(m_is_eliminate_background && i < m_background.size()) {
-            m_background[i] = m_base_data[i];
-        }
         if (!needs_processed_trace) {
             const bool has_background =
+                m_is_eliminate_background &&
                 i < m_background.size() && m_background[i].size() == real_data.size();
             const QVector<double>& background_for_display =
                 has_background ? m_background[i] : zero_background;
@@ -1777,7 +1772,9 @@ void MainWindow::on_display_data(const QVector<QVector<GPR_Complex>>& multichann
                      i < m_base_data.size() &&
                      j < m_base_data[i].size())
                         ? m_base_data[i][j]
-                        : ((i < m_background.size() && j < m_background[i].size()) ? m_background[i][j] : 0.0);
+                        : ((m_is_eliminate_background &&
+                            i < m_background.size() &&
+                            j < m_background[i].size()) ? m_background[i][j] : 0.0);
                 const double adjusted = real_data[j] -
                     background_for_mean;
                 m_mean_background[i][j] =
@@ -1785,24 +1782,39 @@ void MainWindow::on_display_data(const QVector<QVector<GPR_Complex>>& multichann
             }
             updated_mean_background = true;
         }
-        QVector<double> adjusted_trace(m_points, 0.0);
+        QElapsedTimer algorithm_timer;
+        qint64 background_elapsed_ns = 0;
+        qint64 flatten_elapsed_ns = 0;
+        QVector<double> output_trace(m_points, 0.0);
+        algorithm_timer.start();
         for(auto j = 0; j < m_points; ++j) {
             const double background_value =
-                (i < m_background.size() && j < m_background[i].size()) ? m_background[i][j] : 0.0;
+                (m_is_eliminate_background &&
+                 i < m_background.size() &&
+                 j < m_background[i].size()) ? m_background[i][j] : 0.0;
             const double mean_value =
                 (m_is_mean_background && i < m_mean_background.size())
                     ? mean_background_value(m_mean_background[i], j)
                     : 0.0;
-            adjusted_trace[j] = real_data[j] - background_value - mean_value;
+            output_trace[j] = real_data[j] - background_value - mean_value;
         }
-        QVector<double> output_trace = adjusted_trace;
-        QVector<double> v2_trace = output_trace;
+        background_elapsed_ns = algorithm_timer.nsecsElapsed();
+        QVector<double> v2_trace;
+        bool v2_trace_ready = false;
+        const bool should_buffer_this_trace =
+            should_buffer_realtime_v2 && !m_is_replay_loading &&
+            i == safe_display_channel && i < m_v2_hyperbola_history.size();
         if (m_is_mine_ground_trend_flatten_enabled) {
+            algorithm_timer.restart();
             output_trace = apply_mine_ground_trend_flatten_to_trace(i, output_trace);
-            v2_trace = output_trace;
+            flatten_elapsed_ns = algorithm_timer.nsecsElapsed();
+            if (should_buffer_this_trace && !m_is_v2_hyperbola_detector_enabled) {
+                v2_trace = output_trace;
+                v2_trace_ready = true;
+            }
         } else if (m_realtime_processing_delay_pending &&
                    m_pending_realtime_ground_trend_flatten) {
-            QVector<double> warmup_trace = adjusted_trace;
+            QVector<double> warmup_trace = output_trace;
             if (m_pending_realtime_eliminate_background &&
                 !m_is_eliminate_background &&
                 i < m_base_data.size()) {
@@ -1810,20 +1822,35 @@ void MainWindow::on_display_data(const QVector<QVector<GPR_Complex>>& multichann
                     warmup_trace[j] = real_data[j] - m_base_data[i][j];
                 }
             }
-            v2_trace = apply_mine_ground_trend_flatten_to_trace(i, warmup_trace);
+            algorithm_timer.restart();
+            auto warmup_output = apply_mine_ground_trend_flatten_to_trace(i, warmup_trace);
+            flatten_elapsed_ns = algorithm_timer.nsecsElapsed();
+            if (should_buffer_this_trace && !m_is_v2_hyperbola_detector_enabled) {
+                v2_trace = std::move(warmup_output);
+                v2_trace_ready = true;
+            }
         } else if (m_realtime_processing_delay_pending &&
                    m_pending_realtime_eliminate_background &&
                    !m_is_eliminate_background &&
                    i < m_base_data.size()) {
-            v2_trace = adjusted_trace;
-            for (int j = 0; j < v2_trace.size() && j < m_base_data[i].size(); ++j) {
-                v2_trace[j] = real_data[j] - m_base_data[i][j];
+            if (should_buffer_this_trace && !m_is_v2_hyperbola_detector_enabled) {
+                v2_trace = output_trace;
+                for (int j = 0; j < v2_trace.size() && j < m_base_data[i].size(); ++j) {
+                    v2_trace[j] = real_data[j] - m_base_data[i][j];
+                }
+                v2_trace_ready = true;
             }
         }
-        if (should_buffer_realtime_v2 && !m_is_replay_loading &&
-            i == safe_display_channel && i < m_v2_hyperbola_history.size()) {
+        if (!m_is_replay_loading &&
+            (m_is_eliminate_background || m_is_mean_background ||
+             m_is_mine_ground_trend_flatten_enabled ||
+             m_realtime_processing_delay_pending)) {
+            m_algorithm_timing_profiler.addTraceTiming(
+                m_track_number, i, background_elapsed_ns, flatten_elapsed_ns);
+        }
+        if (should_buffer_this_trace) {
             m_v2_hyperbola_history[i].append(
-                m_is_v2_hyperbola_detector_enabled ? output_trace : v2_trace);
+                m_is_v2_hyperbola_detector_enabled || !v2_trace_ready ? output_trace : v2_trace);
         } else if (m_is_v2_hyperbola_detector_enabled && m_is_replay_loading &&
                    !replay_deferred_processing &&
                    i < m_replay_v2_channel_buffer.size()) {
@@ -1929,7 +1956,6 @@ void MainWindow::on_display_data(const QVector<QVector<GPR_Complex>>& multichann
             // m_image2d_plot_sideview->append(strength_data);
         // }
         m_track_number_label->setText(QString("%1").arg(++m_track_number));
-        update_range_avg_display();
 }
 
 void MainWindow::on_display_data_batch(const QVector<QVector<QVector<GPR_Complex>>>& data_batch)
@@ -2489,7 +2515,17 @@ int MainWindow::apply_realtime_v2_hyperbola_backfill(bool flush_all)
     m_v2_hyperbola_task_in_progress.store(true);
     m_v2_hyperbola_last_window_start = window_start_track;
     std::thread([=, this, snapshot = std::move(snapshot)]() mutable {
+        QElapsedTimer v2_timer;
+        v2_timer.start();
         V2HyperbolaResult result = detect_v2_hyperbola(snapshot, dt_ns, params);
+        const qint64 valley_elapsed_ns = v2_timer.nsecsElapsed();
+        m_algorithm_timing_profiler.addV2WindowTiming(
+            window_start_track,
+            window_end_track,
+            valley_elapsed_ns,
+            result.num_seeds,
+            result.num_verified,
+            result.boxes.size());
 
         QMetaObject::invokeMethod(this, [this, task_id, window_start_track, window_end_track, flush_all,
                                          boxes = std::move(result.boxes)]() mutable {
@@ -2785,6 +2821,7 @@ void MainWindow::render_realtime_v2_hyperbola_range(int begin_track, int end_tra
 void MainWindow::clear(int points,int all_channel_count) {
     m_track_number = 0;
     m_cache_block_index = 0;
+    m_algorithm_timing_profiler.reset();
     ++m_processing_rebuild_task_id;
     reset_display_scale_reference();
     m_raw_data.clear();

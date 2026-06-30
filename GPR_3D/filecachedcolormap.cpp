@@ -48,14 +48,19 @@ double map_signed_value(double value, double k)
     return (value + span) / (2.0 * span);
 }
 
-auto normalize_value(double value,QString &plot_id)
+double normalized_map_k()
 {
     double k = g_map_k.load();
     if (!std::isfinite(k) || k <= 1e-9) {
         k = 1.0;
     }
-    if(plot_id=="1"){
-          return map_signed_value(value, k);
+    return k;
+}
+
+auto normalize_value(double value, double k, bool is_signed_plot)
+{
+    if(is_signed_plot){
+        return map_signed_value(value, k);
     }else{
         value = std::abs(value);
         return map_value(value,k);
@@ -76,6 +81,7 @@ FileCachedColorMap::FileCachedColorMap(QCPAxis& key_axis, QCPAxis& value_axis,
       m_is_realtime_enabled(true),
       m_is_instant_data_enabled(false),
       m_io_suspended(false),
+      m_is_signed_plot(plotId == QStringLiteral("1")),
       m_value_size(0),
       m_last_block_index(-1),
       m_absolute_track_count(0),
@@ -128,8 +134,10 @@ void FileCachedColorMap::append(const QVector<double>& data,bool is_roll,bool is
     m_block_cache.reserve(m_block_width);
   }
   auto x = static_cast<int>(m_block_cache.size());
+  const double map_k = normalized_map_k();
+  const bool is_signed_plot = m_is_signed_plot;
   for(auto y = 0; y < data.size(); ++y) {
-    m_current_color_map->data()->setCell(x, y, normalize_value(data[y],m_plotId));
+    m_current_color_map->data()->setCell(x, y, normalize_value(data[y], map_k, is_signed_plot));
   }
   m_block_cache.push_back(data);
 
@@ -516,8 +524,10 @@ void FileCachedColorMap::load_block(int index, int resolution) {
   for(auto x = 0; x < columns; ++x) {
     auto track_data = QVector<double>(value_size);
     in.readRawData(reinterpret_cast<char*>(track_data.data()), block_size);
+    const double map_k = normalized_map_k();
+    const bool is_signed_plot = m_is_signed_plot;
     for(auto y = 0; y < track_data.size(); ++y) {
-      map->data()->setCell(x, y, normalize_value(track_data[y],m_plotId));
+      map->data()->setCell(x, y, normalize_value(track_data[y], map_k, is_signed_plot));
     }
   }
   m_loaded_blocks.insert(QString("%1@%2").arg(index).arg(resolution));
@@ -629,9 +639,11 @@ void FileCachedColorMap::setDataInstant(const QVector<QVector<double>>& data, in
         m_overlay_map->data()->setRange(QCPRange(begin_track, begin_track + xSize), m_value_range);
     }
 
+    const double map_k = normalized_map_k();
+    const bool is_signed_plot = m_is_signed_plot;
     for (int x = 0; x < xSize; ++x) {
         for (int y = 0; y < ySize; ++y) {
-            m_overlay_map->data()->setCell(x, y, normalize_value(data[x][y], m_plotId));
+            m_overlay_map->data()->setCell(x, y, normalize_value(data[x][y], map_k, is_signed_plot));
         }
     }
 
@@ -671,8 +683,10 @@ void FileCachedColorMap::replaceDataRange(const QVector<QVector<double>>& data, 
             const int src_x = track - begin_track;
             const int map_x = track - map_begin;
             const auto& trace = data[src_x];
+            const double map_k = normalized_map_k();
+            const bool is_signed_plot = m_is_signed_plot;
             for (int y = 0; y < trace.size(); ++y) {
-                map->data()->setCell(map_x, y, normalize_value(trace[y], m_plotId));
+                map->data()->setCell(map_x, y, normalize_value(trace[y], map_k, is_signed_plot));
             }
             ++replaced;
         }
@@ -847,11 +861,13 @@ void FileCachedColorMap::setCustomGradient(const QVector<QPair<double, QColor>>&
 void FileCachedColorMap::set_map_params(double k)
 {
     g_map_k.store(k);
+    const double map_k = normalized_map_k();
+    const bool is_signed_plot = m_is_signed_plot;
     if (m_current_color_map && !m_block_cache.isEmpty()) {
         for (int x = 0; x < m_block_cache.size(); ++x) {
             const auto& trace = m_block_cache[x];
             for (int y = 0; y < trace.size(); ++y) {
-                m_current_color_map->data()->setCell(x, y, normalize_value(trace[y], m_plotId));
+                m_current_color_map->data()->setCell(x, y, normalize_value(trace[y], map_k, is_signed_plot));
             }
         }
     }

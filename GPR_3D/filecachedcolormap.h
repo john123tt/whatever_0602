@@ -80,6 +80,7 @@ class FileCachedColorMap : QObject {
     bool m_is_realtime_enabled;
     bool m_is_instant_data_enabled;
     bool m_io_suspended;
+    bool m_is_signed_plot;
     int m_value_size;
     QCPRange m_value_range;
     int m_last_block_index;

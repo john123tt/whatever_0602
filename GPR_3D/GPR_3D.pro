@@ -25,6 +25,7 @@ SOURCES += \
     adjustgainsettingdialog.cpp \
     manualadjustgainaxisticker.cpp \
     OpenGLWidget.cpp \
+    algorithmtimingprofiler.cpp \
     backgroundsubtraction.cpp \
     filereplayview.cpp \
     v2hyperboladetector.cpp
@@ -46,6 +47,7 @@ HEADERS += \
     adjustgainsettingdialog.h \
     manualadjustgainaxisticker.h \
     OpenGLWidget.h \
+    algorithmtimingprofiler.h \
     backgroundsubtraction.h \
     filereplayview.h \
     v2hyperboladetector.h

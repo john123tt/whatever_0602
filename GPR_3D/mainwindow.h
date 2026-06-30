@@ -25,6 +25,7 @@
 #include "three_d_volume_view.h"
 #include "three_d_volume_dialog.h"
 #include "backgroundsubtraction.h"
+#include "algorithmtimingprofiler.h"
 #include "rangeslider.h"
 #include "v2hyperboladetector.h"
 
@@ -137,6 +138,7 @@ private:
     AdjustGainSettingDialog* m_adjust_gain_setting_dialog;
     Three_D_Volume_Dialog* m_three_d_volume_dialog;
     BackgroundSubtraction m_background_subtraction;
+    AlgorithmTimingProfiler m_algorithm_timing_profiler;
     QToolButton* m_process_btn = nullptr;
     QToolButton* m_side_panel_toggle_button = nullptr;
 
