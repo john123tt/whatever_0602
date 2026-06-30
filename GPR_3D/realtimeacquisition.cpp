@@ -120,6 +120,7 @@ realtimeacquisition::realtimeacquisition(QWidget *parent)
     ui(new Ui::realtimeacquisition)
 {
     ui->setupUi(this);
+    ui->verticalLayout->insertSpacing(0, 32);
     ui->Start_Capture_Data_button->setCheckable(true);
     const auto buttons = findChildren<QAbstractButton*>();
     for (auto* button : buttons) {
@@ -146,13 +147,35 @@ void realtimeacquisition::on_One_Click_Shutdown_button_clicked()
     confirm.setWindowTitle(QString::fromUtf8("确认关机"));
     confirm.setText(QString::fromUtf8("确认要关闭电脑吗？"));
     confirm.setIcon(QMessageBox::Warning);
+    confirm.setWindowModality(Qt::ApplicationModal);
+    confirm.setStyleSheet(QString::fromUtf8(
+        "QMessageBox QLabel { font-size: 18px; }"
+        "QMessageBox QPushButton { min-width: 128px; min-height: 52px; font-size: 18px; padding: 8px 18px; }"
+    ));
     auto* shutdownButton = confirm.addButton(QString::fromUtf8("确认关机"), QMessageBox::AcceptRole);
     auto* cancelButton = confirm.addButton(QString::fromUtf8("取消"), QMessageBox::RejectRole);
-    confirm.setDefaultButton(qobject_cast<QPushButton*>(cancelButton));
+    for (auto* button : confirm.buttons()) {
+        button->setMinimumSize(128, 52);
+        button->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+    }
+    confirm.setDefaultButton(cancelButton);
+    confirm.setEscapeButton(cancelButton);
+
+    auto* targetScreen = screen();
+    if (!targetScreen) {
+        targetScreen = QGuiApplication::primaryScreen();
+    }
     confirm.adjustSize();
-    if (auto* screen = QGuiApplication::primaryScreen()) {
-        const QRect screenGeometry = screen->availableGeometry();
-        confirm.move(screenGeometry.center() - confirm.rect().center());
+    if (targetScreen) {
+        const QRect screenGeometry = targetScreen->availableGeometry();
+        const int dialogWidth = qMin(420, qMax(280, screenGeometry.width() - 24));
+        const int dialogHeight = qMin(240, qMax(180, screenGeometry.height() - 24));
+        confirm.setMinimumSize(qMin(320, dialogWidth), qMin(190, dialogHeight));
+        confirm.resize(dialogWidth, dialogHeight);
+        confirm.move(screenGeometry.center() - QPoint(confirm.width() / 2, confirm.height() / 2));
+    } else {
+        confirm.setMinimumSize(320, 190);
+        confirm.resize(380, 220);
     }
 
     confirm.exec();
