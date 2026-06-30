@@ -9,6 +9,9 @@
 #include <QRegularExpression>
 #include <QAbstractButton>
 #include <QSizePolicy>
+#include <QGuiApplication>
+#include <QProcess>
+#include <QScreen>
 #include "GPR_SDK.h"
 #include "setting.h"
 #include "utility.h"
@@ -135,6 +138,27 @@ realtimeacquisition::realtimeacquisition(QWidget *parent)
 realtimeacquisition::~realtimeacquisition()
 {
     delete ui;
+}
+
+void realtimeacquisition::on_One_Click_Shutdown_button_clicked()
+{
+    QMessageBox confirm(this);
+    confirm.setWindowTitle(QString::fromUtf8("确认关机"));
+    confirm.setText(QString::fromUtf8("确认要关闭电脑吗？"));
+    confirm.setIcon(QMessageBox::Warning);
+    auto* shutdownButton = confirm.addButton(QString::fromUtf8("确认关机"), QMessageBox::AcceptRole);
+    auto* cancelButton = confirm.addButton(QString::fromUtf8("取消"), QMessageBox::RejectRole);
+    confirm.setDefaultButton(qobject_cast<QPushButton*>(cancelButton));
+    confirm.adjustSize();
+    if (auto* screen = QGuiApplication::primaryScreen()) {
+        const QRect screenGeometry = screen->availableGeometry();
+        confirm.move(screenGeometry.center() - confirm.rect().center());
+    }
+
+    confirm.exec();
+    if (confirm.clickedButton() == shutdownButton) {
+        QProcess::startDetached("shutdown", QStringList{"/s", "/t", "0"});
+    }
 }
 
 void realtimeacquisition::on_One_Click_Configuration_button_clicked()

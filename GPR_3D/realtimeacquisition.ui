@@ -15,6 +15,13 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
+    <widget class="QPushButton" name="One_Click_Shutdown_button">
+     <property name="text">
+      <string>一键关机</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QPushButton" name="One_Click_Configuration_button">
      <property name="text">
       <string>一键配置</string>

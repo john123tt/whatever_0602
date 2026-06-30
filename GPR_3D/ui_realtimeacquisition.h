@@ -23,6 +23,7 @@ class Ui_realtimeacquisition
 {
 public:
     QVBoxLayout *verticalLayout;
+    QPushButton *One_Click_Shutdown_button;
     QPushButton *One_Click_Configuration_button;
     QCheckBox *save_file_check_box;
     QPushButton *Start_Capture_Data_button;
@@ -35,6 +36,11 @@ public:
         realtimeacquisition->resize(367, 686);
         verticalLayout = new QVBoxLayout(realtimeacquisition);
         verticalLayout->setObjectName("verticalLayout");
+        One_Click_Shutdown_button = new QPushButton(realtimeacquisition);
+        One_Click_Shutdown_button->setObjectName("One_Click_Shutdown_button");
+
+        verticalLayout->addWidget(One_Click_Shutdown_button);
+
         One_Click_Configuration_button = new QPushButton(realtimeacquisition);
         One_Click_Configuration_button->setObjectName("One_Click_Configuration_button");
 
@@ -63,6 +69,7 @@ public:
     void retranslateUi(QWidget *realtimeacquisition)
     {
         realtimeacquisition->setWindowTitle(QCoreApplication::translate("realtimeacquisition", "Form", nullptr));
+        One_Click_Shutdown_button->setText(QCoreApplication::translate("realtimeacquisition", "\344\270\200\351\224\256\345\205\263\346\234\272", nullptr));
         One_Click_Configuration_button->setText(QCoreApplication::translate("realtimeacquisition", "\344\270\200\351\224\256\351\205\215\347\275\256", nullptr));
         save_file_check_box->setText(QCoreApplication::translate("realtimeacquisition", "\344\277\235\345\255\230\346\226\207\344\273\266", nullptr));
         Start_Capture_Data_button->setText(QCoreApplication::translate("realtimeacquisition", "\345\274\200\345\247\213\351\207\207\351\233\206", nullptr));

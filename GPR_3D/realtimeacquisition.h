@@ -29,6 +29,7 @@ signals:
     void capture_state_changed(bool running);
 
 private slots:
+    void on_One_Click_Shutdown_button_clicked();
     void on_One_Click_Configuration_button_clicked();
     void on_error(int error_code);
     void on_Start_Capture_Data_button_toggled(bool checked);
